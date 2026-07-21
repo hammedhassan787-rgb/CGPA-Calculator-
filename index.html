@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student CGPA Calculator</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI, sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,#4f46e5,#7c3aed);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.container{
+    width:100%;
+    max-width:900px;
+    background:#fff;
+    border-radius:20px;
+    padding:25px;
+    box-shadow:0 15px 35px rgba(0,0,0,0.2);
+}
+
+h1{
+    text-align:center;
+    color:#4f46e5;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#666;
+    margin-bottom:25px;
+}
+
+.form{
+    display:grid;
+    grid-template-columns:2fr 1fr 1fr auto;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+input,select{
+    padding:12px;
+    border:2px solid #ddd;
+    border-radius:10px;
+    font-size:15px;
+}
+
+button{
+    border:none;
+    cursor:pointer;
+    border-radius:10px;
+    font-weight:bold;
+}
+
+.add-btn{
+    background:#4f46e5;
+    color:white;
+    padding:12px 20px;
+}
+
+.add-btn:hover{
+    background:#4338ca;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+
+th{
+    background:#4f46e5;
+    color:white;
+    padding:12px;
+}
+
+td{
+    padding:10px;
+    text-align:center;
+    border-bottom:1px solid #ddd;
+}
+
+.delete-btn{
+    background:#ef4444;
+    color:white;
+    padding:6px 12px;
+}
+
+.delete-btn:hover{
+    background:#dc2626;
+}
+
+.result{
+    margin-top:25px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+
+.card{
+    background:#f4f4f4;
+    border-radius:15px;
+    padding:20px;
+    text-align:center;
+}
+
+.card h3{
+    color:#555;
+    margin-bottom:10px;
+}
+
+.card p{
+    font-size:24px;
+    font-weight:bold;
+    color:#4f46e5;
+}
+
+.footer{
+    text-align:center;
+    margin-top:20px;
+    color:#666;
+}
+
+@media(max-width:700px){
+
+.form{
+grid-template-columns:1fr;
+}
+
+.result{
+grid-template-columns:1fr;
+}
+
+table{
+font-size:13px;
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🎓 Student CGPA Calculator</h1>
+<p class="subtitle">Calculate your GPA/CGPA easily</p>
+
+<div class="form">
+<input type="text" id="courseName" placeholder="Course Code">
+<input type="number" id="courseUnit" placeholder="Unit">
+
+<select id="grade">
+<option value="5">A</option>
+<option value="4">B</option>
+<option value="3">C</option>
+<option value="2">D</option>
+<option value="1">E</option>
+<option value="0">F</option>
+</select>
+
+<button class="add-btn" onclick="addCourse()">Add</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Course</th>
+<th>Unit</th>
+<th>Grade</th>
+<th>Grade Point</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="courseTable"></tbody>
+</table>
+
+<div class="result">
+
+<div class="card">
+<h3>Total Units</h3>
+<p id="units">0</p>
+</div>
+
+<div class="card">
+<h3>Total Points</h3>
+<p id="points">0</p>
+</div>
+
+<div class="card">
+<h3>CGPA</h3>
+<p id="cgpa">0.00</p>
+</div>
+
+</div>
+
+<div class="footer">
+Made for Students ❤️
+</div>
+
+</div>
+
+<script>
+
+let courses=[];
+
+function gradeLetter(point){
+
+switch(Number(point)){
+case 5:return "A";
+case 4:return "B";
+case 3:return "C";
+case 2:return "D";
+case 1:return "E";
+default:return "F";
+}
+}
+
+function addCourse(){
+
+let name=document.getElementById("courseName").value.trim();
+let unit=parseInt(document.getElementById("courseUnit").value);
+let grade=parseInt(document.getElementById("grade").value);
+
+if(name==="" || !unit || unit<=0){
+alert("Please enter valid course details");
+return;
+}
+
+courses.push({
+name,
+unit,
+grade,
+gp:unit*grade
+});
+
+document.getElementById("courseName").value="";
+document.getElementById("courseUnit").value="";
+
+renderTable();
+calculateCGPA();
+}
+
+function deleteCourse(index){
+courses.splice(index,1);
+renderTable();
+calculateCGPA();
+}
+
+function renderTable(){
+
+let table=document.getElementById("courseTable");
+table.innerHTML="";
+
+courses.forEach((course,index)=>{
+
+table.innerHTML+=`
+<tr>
+<td>${course.name}</td>
+<td>${course.unit}</td>
+<td>${gradeLetter(course.grade)}</td>
+<td>${course.gp}</td>
+<td>
+<button class="delete-btn"
+onclick="deleteCourse(${index})">
+Delete
+</button>
+</td>
+</tr>
+`;
+
+});
+}
+
+function calculateCGPA(){
+
+let totalUnits=0;
+let totalPoints=0;
+
+courses.forEach(course=>{
+totalUnits+=course.unit;
+totalPoints+=course.gp;
+});
+
+let cgpa=0;
+
+if(totalUnits>0){
+cgpa=(totalPoints/totalUnits).toFixed(2);
+}
+
+document.getElementById("units").textContent=totalUnits;
+document.getElementById("points").textContent=totalPoints;
+document.getElementById("cgpa").textContent=cgpa;
+}
+
+</script>
+
+</body>
+</html>
